@@ -1,0 +1,122 @@
+@* _Layout.cshtml is the master page / template shared by every view (wired up in
+   _ViewStart.cshtml). It defines the HTML skeleton, the top navigation bar, and the footer.
+   Each individual view's content is injected where @RenderBody() appears. *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* The page title combines the per-view ViewData["Title"] with the site name. *@
+    <title>@ViewData["Title"] - PremiumMotors</title>
+    <script type="importmap"></script>
+    @* Stylesheets: Bootstrap (vendor), the site's own styles, and the bundled scoped CSS.
+       asp-append-version="true" appends a content hash to the URL for cache-busting, so
+       browsers re-download the file whenever it changes. *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WEBTechnologies_Final.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @* Read the current user's state from the session once, so the nav below can decide what
+       to show (guest vs. logged-in user vs. admin). Context.Session is the same session the
+       controllers write to via SessionKeys. *@
+    @{
+        var isAdmin = Context.Session.GetString(SessionKeys.IsAdmin) == "true";
+        var currentUser = Context.Session.GetString(SessionKeys.Username);
+        var isLoggedIn = !string.IsNullOrEmpty(currentUser);
+    }
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                @* Brand/logo links back to the catalogue. asp-controller/asp-action build the
+                   correct URL from the routing table (no hardcoded paths). *@
+                <a class="navbar-brand fw-bold" asp-controller="Cars" asp-action="Index">
+                    🏁 Premium<span class="text-warning">Motors</span>
+                </a>
+                @* Hamburger toggle shown on small screens (Bootstrap collapse). *@
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @* ----- Left-hand nav links ----- *@
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-controller="Cars" asp-action="Index">Browse Auctions</a>
+                        </li>
+                        @* Favourites link only for ordinary logged-in users (not the admin). *@
+                        @if (isLoggedIn && !isAdmin)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Favorites" asp-action="Index">♥ My Favourites</a>
+                            </li>
+                        }
+                        @* Admin-only management links. *@
+                        @if (isAdmin)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Admin" asp-action="Index">Manage Listings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-success" asp-controller="Admin" asp-action="Create">+ Post a Car</a>
+                            </li>
+                        }
+                    </ul>
+                    @* ----- Right-hand account area ----- *@
+                    <ul class="navbar-nav">
+                        @if (isLoggedIn)
+                        {
+                            @* Greeting + an "Admin" badge when applicable. *@
+                            <li class="nav-item d-flex align-items-center text-light me-2">
+                                @if (isAdmin)
+                                {
+                                    <span class="badge bg-warning text-dark me-1">Admin</span>
+                                }
+                                <span class="small">Hi, <strong>@currentUser</strong></span>
+                            </li>
+                            @* Logout is a POST form (state-changing actions should not be GET
+                               links) and carries an anti-forgery token automatically. *@
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-light">Log out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            @* Guests see login/register links instead. *@
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Log in</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        @* Render the shared flash-message partial (success/error banners from TempData). *@
+        <partial name="_Alerts" />
+        <main role="main" class="pb-3">
+            @* The current view's content is injected here. *@
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - PremiumMotors
+        </div>
+    </footer>
+    @* Vendor scripts (jQuery + Bootstrap) then the site script. *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @* Optional "Scripts" section: views (e.g. forms needing validation) can inject extra
+       scripts here. required:false means views without a Scripts section are fine. *@
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,44 @@
+@* _FavoriteButton is a reusable partial that renders the heart/favourite control for a car.
+   It is shown on listing cards and the details page. Its model is a single Car. *@
+@model WEBTechnologies_Final.Models.Car
+@{
+    @* Read the current user from the session. *@
+    var username = Context.Session.GetString(WEBTechnologies_Final.Services.SessionKeys.Username);
+    var loggedIn = !string.IsNullOrEmpty(username);
+    @* Whether THIS car is already a favourite. The controller pre-computed this and stored it
+       in ViewData under the key "IsFav_{carId}" (see CarsController.Details), so the partial
+       avoids doing its own database call. "is true" safely handles the value being null. *@
+    var isFav = ViewData["IsFav_" + Model.Id] is true;
+    @* The page the user is currently on, so toggling returns them right back here. *@
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    @* Optional extra CSS classes a caller can pass in via ViewData to size/style the button. *@
+    var extra = ViewData["FavBtnClass"] as string ?? "";
+}
+
+@if (loggedIn)
+{
+    @* Logged-in users get a real POST form that toggles the favourite.
+       style="display:contents" makes the <form> wrapper not affect layout, so the button
+       sits naturally wherever the partial is dropped. *@
+    <form asp-controller="Favorites" asp-action="Toggle" method="post" style="display:contents">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        @* The button's colour, tooltip and label all switch on isFav. @(...) is an explicit
+           Razor expression used here to embed a ternary inside an attribute/content. *@
+        <button type="submit"
+                class="btn @(isFav ? "btn-danger" : "btn-outline-danger") @extra"
+                title="@(isFav ? "Remove from favourites" : "Save to favourites")">
+            @(isFav ? "♥ Saved" : "♡ Favourite")
+        </button>
+    </form>
+}
+else
+{
+    @* Guests instead get a link to the login page, carrying returnUrl so they come back to
+       this page after signing in. asp-route-returnUrl adds it as a route/query value. *@
+    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl"
+       class="btn btn-outline-danger @extra" title="Log in to save favourites">
+        ♡ Favourite
+    </a>
+}

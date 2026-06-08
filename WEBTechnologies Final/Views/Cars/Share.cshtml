@@ -1,0 +1,63 @@
+@* Cars/Share — a page with social share links and a copy-to-clipboard box for one listing.
+   Model is the Car; the controller passed the absolute listing URL in ViewData["ListingUrl"]. *@
+@model Car
+@{
+    ViewData["Title"] = "Share " + Model.Title;
+    @* The full URL to share (e.g. https://host/Cars/Details/5). *@
+    var url = ViewData["ListingUrl"] as string ?? "";
+    @* URL-encode the link and a message so they are safe to embed in share URLs/query strings
+       (Uri.EscapeDataString turns spaces, &, etc. into %xx escapes). *@
+    var encodedUrl = Uri.EscapeDataString(url);
+    var encodedText = Uri.EscapeDataString($"Check out this {Model.Title} on PremiumMotors!");
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <img src="@Model.PrimaryImage" class="card-img-top detail-img" alt="@Model.Title" />
+            <div class="card-body">
+                <h1 class="h4">Share “@Model.Title”</h1>
+                <p class="text-muted">Current bid: <strong>@Model.CurrentPrice.ToString("C")</strong></p>
+
+                @* Read-only box holding the link, with a Copy button wired to the script below. *@
+                <label class="form-label fw-semibold">Listing link</label>
+                <div class="input-group mb-3">
+                    <input type="text" id="shareUrl" class="form-control" value="@url" readonly />
+                    <button class="btn btn-primary" type="button" onclick="copyShareUrl()">Copy</button>
+                </div>
+
+                @* Share buttons. Each is a normal link to the platform's share endpoint with the
+                   encoded URL/text. target="_blank" opens a new tab; rel="noopener" is a security
+                   best practice that stops the opened page from accessing window.opener. *@
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-primary"
+                       href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" target="_blank" rel="noopener">Facebook</a>
+                    <a class="btn btn-outline-info"
+                       href="https://twitter.com/intent/tweet?url=@encodedUrl&text=@encodedText" target="_blank" rel="noopener">X / Twitter</a>
+                    <a class="btn btn-outline-success"
+                       href="https://wa.me/?text=@encodedText%20@encodedUrl" target="_blank" rel="noopener">WhatsApp</a>
+                    <a class="btn btn-outline-secondary"
+                       href="mailto:?subject=@Uri.EscapeDataString(Model.Title)&body=@encodedText%20@encodedUrl">Email</a>
+                </div>
+
+                <hr />
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-link px-0">&larr; Back to listing</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Client-side copy handler, injected into the layout's Scripts section. *@
+@section Scripts {
+    <script>
+        function copyShareUrl() {
+            const input = document.getElementById('shareUrl');
+            input.select();
+            input.setSelectionRange(0, 99999); // select all (mobile-friendly)
+            // The async Clipboard API writes the value; then we confirm to the user.
+            navigator.clipboard.writeText(input.value).then(function () {
+                alert('Link copied to clipboard!');
+            });
+        }
+    </script>
+}
