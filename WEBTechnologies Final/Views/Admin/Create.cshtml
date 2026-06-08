@@ -1,0 +1,27 @@
+@* Admin/Create — page to post a new listing. It's just a wrapper: the actual fields live in
+   the shared _CarForm partial. Model is the (mostly blank) Car the controller created. *@
+@model Car
+@{
+    ViewData["Title"] = "Post a Car";
+}
+
+<h1 class="h3 mb-3">Post a Car for Auction</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @* enctype="multipart/form-data" is REQUIRED for file uploads — without it the photo
+           files would not be sent to the server. Posts to AdminController.Create. *@
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            @* Render the shared field set, passing this view's model down to it. *@
+            <partial name="_CarForm" model="Model" />
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">Post listing</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

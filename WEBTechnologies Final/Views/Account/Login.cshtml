@@ -1,0 +1,62 @@
+@* The login form. @model ties this view to LoginViewModel, so the asp-for tag helpers below
+   are strongly typed against its properties (compile-time checked, auto labels + validation). *@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Log In";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <h1 class="h4 mb-3">Log In</h1>
+
+                @* Shows validation errors. "All" includes both model-level errors (e.g. the
+                   "invalid username or password" message the controller adds) and per-field
+                   errors. *@
+                <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+                @* asp-action="Login" posts back to AccountController.Login [HttpPost]. *@
+                <form asp-action="Login" method="post">
+                    @* Anti-forgery token — pairs with [ValidateAntiForgeryToken] on the action
+                       to block CSRF. *@
+                    @Html.AntiForgeryToken()
+                    @* Preserve the return URL through the round trip so the user lands back on
+                       the page they originally wanted after logging in. *@
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3">
+                        @* asp-for renders the label text (from [Display]) and binds the input
+                           to model.Username; asp-validation-for shows that field's error. *@
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" autofocus />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        @* asp-for on a [DataType(Password)] property renders type="password". *@
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Log in</button>
+                </form>
+
+                <p class="text-center mt-3 mb-0">
+                    New here? <a asp-action="Register">Create an account</a>
+                </p>
+
+                @* Demo hint for the hardcoded admin account (see AccountController). *@
+                <div class="alert alert-info small mt-3 mb-0">
+                    <strong>Admin demo:</strong> <code>admin</code> / <code>admin123</code>
+                    (real auth arrives with the database).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Inject the jQuery validation scripts into the layout's optional "Scripts" section so the
+   form validates in the browser before submitting. *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

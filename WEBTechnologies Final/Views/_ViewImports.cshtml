@@ -1,0 +1,11 @@
+@* _ViewImports.cshtml is applied automatically to EVERY Razor view in this folder and its
+   subfolders. Putting shared directives here means individual views don't have to repeat them.
+
+   @using ...        -> import these namespaces so views can use the types (e.g. Car, CarType,
+                        SessionKeys) without fully-qualifying them.
+   @addTagHelper ... -> enable ASP.NET Core's built-in tag helpers (asp-for, asp-action,
+                        asp-controller, asp-validation-for, etc.) used throughout the views. *@
+@using WEBTechnologies_Final
+@using WEBTechnologies_Final.Models
+@using WEBTechnologies_Final.Services
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

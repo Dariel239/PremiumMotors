@@ -1,0 +1,7 @@
+@* _ValidationScriptsPartial.cshtml bundles the jQuery validation scripts. Forms that want
+   client-side validation render this (via a Scripts section) so the data-annotation rules on
+   the view models (e.g. [Required], [StringLength], [Compare]) are checked in the browser
+   before submitting — instant feedback without a round trip. The same rules are ALSO enforced
+   server-side, so this is a convenience layer, not the security boundary. *@
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
